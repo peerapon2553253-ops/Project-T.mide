@@ -1,0 +1,19 @@
+<?php
+require __DIR__ . '/config.php';
+require_login();
+$stmt = db()->query('SELECT * FROM `17_tasks` ORDER BY subject, COALESCE(due_date, "9999-12-31"), created_at DESC');
+$tasks = $stmt->fetchAll();
+$grouped = array_fill_keys(SUBJECTS, []);
+foreach ($tasks as $task) {
+    if (isset($grouped[$task['subject']])) {
+        $grouped[$task['subject']][] = $task;
+    }
+}
+?>
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>แดชบอร์ด | WorkCheck</title><link rel="stylesheet" href="style.css"></head>
+<body><header class="topbar"><a class="brand" href="index.php"><span class="brand-mark"></span>WorkCheck</a><nav><a href="index.php">หน้าหลัก</a><a href="task_form.php">เพิ่มงาน</a><span class="muted">สวัสดี <?= e($_SESSION['user_name']) ?></span><a href="logout.php">ออกจากระบบ</a></nav></header>
+<main class="container section"><div class="section-heading"><div><p class="eyebrow">พื้นที่ผู้ดูแล</p><h2>จัดการงานรายวิชา</h2></div><a class="button" href="task_form.php">+ เพิ่มงาน</a></div>
+<?php if (!$tasks): ?><div class="empty">ยังไม่มีงาน <a href="task_form.php">เพิ่มรายการแรก</a></div><?php else: ?>
+<?php foreach (SUBJECTS as $subject): if (!$grouped[$subject]) { continue; } ?><section class="panel subject-table"><h3><?= e($subject) ?></h3><div class="table-wrap"><table><thead><tr><th>งาน</th><th>กำหนดส่ง</th><th>เฉลย</th><th></th></tr></thead><tbody>
+<?php foreach ($grouped[$subject] as $task): ?><tr><td><strong><?= e($task['title']) ?></strong><?php if ($task['description'] !== ''): ?><br><small class="muted"><?= e($task['description']) ?></small><?php endif; ?></td><td><?= $task['due_date'] ? e(date('d/m/Y', strtotime($task['due_date']))) : '-' ?></td><td><?= $task['answer_image'] ? 'มีรูปเฉลย' : 'ไม่มีรูปเฉลย' ?></td><td class="actions"><a href="task_form.php?id=<?= (int) $task['id'] ?>">แก้ไข</a><form method="post" action="task_delete.php" onsubmit="return confirm('ยืนยันการลบงานนี้?')"><input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>"><input type="hidden" name="id" value="<?= (int) $task['id'] ?>"><button class="link-button" type="submit">ลบ</button></form></td></tr><?php endforeach; ?>
+</tbody></table></div></section><?php endforeach; endif; ?></main></body></html>

@@ -1,0 +1,25 @@
+CREATE DATABASE IF NOT EXISTS workcheck CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE workcheck;
+
+CREATE TABLE IF NOT EXISTS `17_users` (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(120) NOT NULL,
+    email VARCHAR(190) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS `17_tasks` (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(180) NOT NULL,
+    subject VARCHAR(120) NOT NULL,
+    description TEXT NOT NULL,
+    due_date DATE NULL,
+    answer_image VARCHAR(255) NULL,
+    created_by INT UNSIGNED NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_17_tasks_user FOREIGN KEY (created_by) REFERENCES `17_users`(id) ON DELETE CASCADE,
+    INDEX idx_17_tasks_status (status),
+    INDEX idx_17_tasks_due_date (due_date)
+);
