@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS workcheck CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE workcheck;
-
 CREATE TABLE IF NOT EXISTS `17_users` (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(120) NOT NULL,
@@ -20,6 +17,5 @@ CREATE TABLE IF NOT EXISTS `17_tasks` (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_17_tasks_user FOREIGN KEY (created_by) REFERENCES `17_users`(id) ON DELETE CASCADE,
-    INDEX idx_17_tasks_status (status),
     INDEX idx_17_tasks_due_date (due_date)
 );
