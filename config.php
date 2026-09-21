@@ -79,10 +79,29 @@ function require_login(): void
 function require_auth(): void
 {
     start_session();
+    enforce_suspension();
     if (empty($_SESSION['user_id'])) {
         $returnUrl = $_SERVER['REQUEST_URI'] ?? 'index.php';
         header('Location: Login.php?return=' . urlencode($returnUrl));
         exit;
+    }
+
+}
+
+function enforce_suspension(): void
+{
+    if (empty($_SESSION['user_id']) || !empty($_SESSION['is_admin'])) {
+        return;
+    }
+    $stmt = db()->prepare('SELECT suspended_until, suspended_permanent FROM `17_users` WHERE id = ?');
+    $stmt->execute([$_SESSION['user_id']]);
+    $user = $stmt->fetch();
+    if ($user && ((int) $user['suspended_permanent'] === 1 || ($user['suspended_until'] && strtotime($user['suspended_until']) > time()))) {
+        $until = $user['suspended_permanent'] ? 'ถาวร' : date('d/m/Y H:i', strtotime($user['suspended_until']));
+        $_SESSION = [];
+        session_destroy();
+        http_response_code(403);
+        exit('บัญชีนี้ถูกระงับการใช้งานถึง ' . $until);
     }
 }
 

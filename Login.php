@@ -43,10 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $identity = trim($_POST['identity'] ?? '');
         $password = $_POST['password'] ?? '';
-        $stmt = db()->prepare('SELECT id, full_name, password_hash FROM `17_users` WHERE email = ? OR full_name = ?');
+        $stmt = db()->prepare('SELECT id, full_name, password_hash, suspended_until, suspended_permanent FROM `17_users` WHERE email = ? OR full_name = ?');
         $stmt->execute([$identity, $identity]);
         $user = $stmt->fetch();
-        if ($user && password_verify($password, $user['password_hash'])) {
+        $suspended = $user && ((int) $user['suspended_permanent'] === 1 || ($user['suspended_until'] && strtotime($user['suspended_until']) > time()));
+        if ($user && $suspended) {
+            $error = 'บัญชีนี้ถูกระงับการใช้งาน';
+        } elseif ($user && password_verify($password, $user['password_hash'])) {
             session_regenerate_id(true);
             $_SESSION['user_id'] = (int) $user['id'];
             $_SESSION['user_name'] = $user['full_name'];
