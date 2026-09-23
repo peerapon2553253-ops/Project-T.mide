@@ -1,10 +1,8 @@
 <?php
-declare(strict_types=1);
-
-const DB_HOST = '127.0.0.1';
-const DB_NAME = 'workcheck';
-const DB_USER = 'root';
-const DB_PASS = '';
+const DB_HOST = 'localhost';
+const DB_NAME = 'kasetwit_web69';
+const DB_USER = 'kasetwit_web69';
+const DB_PASS = 'web69_witcom';
 const ADMIN_PIN = '9233';
 const ADMIN_USERNAME = 'GuyandIce';
 const ADMIN_PASSWORD = '1719';
@@ -17,7 +15,7 @@ const SUBJECTS = [
     'พละ', 'สุขศึกษา', 'ชีววิทยา', 'การงานอาชีพ', 'ปัญญาประดิษฐ์',
 ];
 
-function db(): PDO
+function db()
 {
     static $pdo;
 
@@ -37,12 +35,12 @@ function db(): PDO
     return $pdo;
 }
 
-function e(string $value): string
+function e($value)
 {
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
-function start_session(): void
+function start_session()
 {
     if (session_status() !== PHP_SESSION_ACTIVE) {
         $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
@@ -59,7 +57,7 @@ function start_session(): void
     }
 }
 
-function csrf_token(): string
+function csrf_token()
 {
     start_session();
     if (empty($_SESSION['csrf'])) {
@@ -68,7 +66,7 @@ function csrf_token(): string
     return $_SESSION['csrf'];
 }
 
-function check_csrf(): void
+function check_csrf()
 {
     start_session();
     if (!hash_equals($_SESSION['csrf'] ?? '', $_POST['csrf'] ?? '')) {
@@ -77,7 +75,7 @@ function check_csrf(): void
     }
 }
 
-function require_login(): void
+function require_login()
 {
     start_session();
     if (empty($_SESSION['user_id']) || empty($_SESSION['is_admin'])) {
@@ -86,7 +84,7 @@ function require_login(): void
     }
 }
 
-function require_auth(): void
+function require_auth()
 {
     start_session();
     enforce_suspension();
@@ -98,7 +96,7 @@ function require_auth(): void
 
 }
 
-function enforce_suspension(): void
+function enforce_suspension()
 {
     if (empty($_SESSION['user_id']) || !empty($_SESSION['is_admin'])) {
         return;
@@ -115,19 +113,19 @@ function enforce_suspension(): void
     }
 }
 
-function redirect(string $url): void
+function redirect($url)
 {
     header('Location: ' . $url);
     exit;
 }
 
-function flash(string $type, string $message): void
+function flash($type, $message)
 {
     start_session();
     $_SESSION['flash'] = ['type' => $type, 'message' => $message];
 }
 
-function consume_flash(): ?array
+function consume_flash()
 {
     start_session();
     $message = $_SESSION['flash'] ?? null;
@@ -135,7 +133,7 @@ function consume_flash(): ?array
     return $message;
 }
 
-function local_upload_path(?string $file): ?string
+function local_upload_path($file)
 {
     if (!$file) {
         return null;

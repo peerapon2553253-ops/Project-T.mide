@@ -35,7 +35,7 @@ if (!empty($_SESSION['user_id'])) {
     $unreadCount = (int) $n->fetchColumn();
 }
 $returnUrl = $_SERVER['REQUEST_URI'] ?? 'index.php';
-function render_room_comments(array $comments, ?int $parentId, string $returnUrl): void
+function render_room_comments($comments, $parentId, $returnUrl)
 {
     foreach ($comments as $comment) {
         if (($comment['parent_id'] === null ? null : (int) $comment['parent_id']) !== $parentId) continue;
