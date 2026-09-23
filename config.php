@@ -45,6 +45,16 @@ function e(string $value): string
 function start_session(): void
 {
     if (session_status() !== PHP_SESSION_ACTIVE) {
+        $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+        if (PHP_VERSION_ID >= 70300) {
+            session_set_cookie_params([
+                'httponly' => true,
+                'samesite' => 'Lax',
+                'secure' => $secure,
+            ]);
+        } else {
+            session_set_cookie_params(0, '/', '', $secure, true);
+        }
         session_start();
     }
 }
@@ -105,8 +115,31 @@ function enforce_suspension(): void
     }
 }
 
-function redirect(string $url): never
+function redirect(string $url): void
 {
     header('Location: ' . $url);
     exit;
+}
+
+function flash(string $type, string $message): void
+{
+    start_session();
+    $_SESSION['flash'] = ['type' => $type, 'message' => $message];
+}
+
+function consume_flash(): ?array
+{
+    start_session();
+    $message = $_SESSION['flash'] ?? null;
+    unset($_SESSION['flash']);
+    return $message;
+}
+
+function local_upload_path(?string $file): ?string
+{
+    if (!$file) {
+        return null;
+    }
+    $name = basename($file);
+    return __DIR__ . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $name;
 }

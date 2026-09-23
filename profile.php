@@ -33,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_name'] = $name;
             $user['full_name'] = $name;
             $user['email'] = $email;
+            flash('success', 'บันทึกโปรไฟล์แล้ว');
             $success = 'บันทึกโปรไฟล์แล้ว';
         }
     }

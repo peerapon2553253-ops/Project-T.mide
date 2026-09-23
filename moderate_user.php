@@ -17,5 +17,8 @@ if ($userId && $userId !== (int) $_SESSION['user_id']) {
         $stmt = db()->prepare('UPDATE `17_users` SET suspended_permanent = 0, suspended_until = NULL WHERE id = ?');
         $stmt->execute([$userId]);
     }
+    flash('success', 'อัปเดตสถานะบัญชีเรียบร้อยแล้ว');
+} else {
+    flash('error', 'ไม่สามารถจัดการบัญชีนี้ได้');
 }
 redirect('dashboard.php');

@@ -9,6 +9,7 @@ if ($id) {
     $task = $stmt->fetch() ?: redirect('dashboard.php');
 }
 $error = '';
+$newImagePath = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();
     $title = trim($_POST['title'] ?? '');
@@ -27,24 +28,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . 'uploads';
             if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
-                throw new RuntimeException('ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้');
+                $error = 'ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้';
+            } else {
+                $fileName = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
+                $newImagePath = $uploadDir . DIRECTORY_SEPARATOR . $fileName;
+                if (!move_uploaded_file($file['tmp_name'], $newImagePath)) {
+                    $error = 'ไม่สามารถบันทึกรูปเฉลยได้';
+                    $newImagePath = null;
+                } else {
+                    $answerImage = $fileName;
+                }
             }
-            $fileName = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
-            if (!move_uploaded_file($file['tmp_name'], $uploadDir . DIRECTORY_SEPARATOR . $fileName)) {
-                throw new RuntimeException('ไม่สามารถบันทึกรูปเฉลยได้');
-            }
-            $answerImage = $fileName;
         }
     }
     if ($error === '') {
-        if ($id) {
-            $stmt = db()->prepare('UPDATE `17_tasks` SET title=?, subject=?, description=?, due_date=?, answer_image=? WHERE id=?');
-            $stmt->execute([$title, $subject, $description, $dueDate, $answerImage, $id]);
-        } else {
-            $stmt = db()->prepare('INSERT INTO `17_tasks` (title, subject, description, due_date, answer_image, created_by) VALUES (?, ?, ?, ?, ?, ?)');
-            $stmt->execute([$title, $subject, $description, $dueDate, $answerImage, $_SESSION['user_id']]);
+        try {
+            if ($id) {
+                $stmt = db()->prepare('UPDATE `17_tasks` SET title=?, subject=?, description=?, due_date=?, answer_image=? WHERE id=?');
+                $stmt->execute([$title, $subject, $description, $dueDate, $answerImage, $id]);
+                if ($answerImage !== ($task['answer_image'] ?? null)) {
+                    $oldImage = local_upload_path($task['answer_image'] ?? null);
+                    if ($oldImage && is_file($oldImage)) {
+                        unlink($oldImage);
+                    }
+                }
+            } else {
+                $stmt = db()->prepare('INSERT INTO `17_tasks` (title, subject, description, due_date, answer_image, created_by) VALUES (?, ?, ?, ?, ?, ?)');
+                $stmt->execute([$title, $subject, $description, $dueDate, $answerImage, $_SESSION['user_id']]);
+                $newTaskId = (int) db()->lastInsertId();
+                if ($newTaskId < 1) {
+                    throw new RuntimeException('ฐานข้อมูลไม่ได้สร้างรหัสงานอัตโนมัติ กรุณาตรวจสอบคอลัมน์ id ของตาราง 17_tasks ให้เป็น AUTO_INCREMENT');
+                }
+            }
+            flash('success', $id ? 'แก้ไขงานเรียบร้อยแล้ว' : 'เพิ่มงานเรียบร้อยแล้ว');
+            redirect('dashboard.php');
+        } catch (Throwable $exception) {
+            if ($newImagePath && is_file($newImagePath)) {
+                unlink($newImagePath);
+            }
+            error_log('WorkCheck task_form: ' . $exception->getMessage());
+            $error = 'บันทึกงานไม่สำเร็จ: ' . $exception->getMessage();
         }
-        redirect('dashboard.php');
     }
     $task = ['title' => $title, 'subject' => $subject, 'description' => $description, 'due_date' => $dueDate ?? '', 'answer_image' => $answerImage];
 }

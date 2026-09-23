@@ -220,7 +220,9 @@ tr:last-child td { border-bottom: 0; }
 .actions a, .link-button { color: var(--green); background: none; border: 0; padding: 0; cursor: pointer; font: inherit; text-decoration: none; }
 .actions .link-button { color: var(--red); }
 .moderate-form { display: flex; align-items: center; gap: 8px; }
+.moderate-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .moderate-form select { width: auto; min-width: 125px; margin: 0; padding: 7px 10px; }
+.danger-button { border: 0; color: var(--red); background: transparent; cursor: pointer; font: inherit; font-size: 13px; }
 
 .comment-trigger { display: flex; align-items: center; gap: 8px; margin-top: 16px; padding: 0; color: var(--green); background: none; border: 0; cursor: pointer; font-size: 14px; }
 .comment-trigger:first-letter { font-size: 22px; }
@@ -257,12 +259,33 @@ tr:last-child td { border-bottom: 0; }
 }
 @media (max-width: 650px) {
     .container { width: min(100% - 28px, 560px); }
-    .topbar { min-height: 64px; padding: 10px 14px; gap: 10px; }
+    .topbar {
+        min-height: 64px;
+        padding: 10px 14px 8px;
+        gap: 8px 10px;
+        flex-wrap: wrap;
+    }
     .brand { font-size: 20px; }
     .brand-mark { width: 23px; height: 23px; }
-    nav { gap: 10px; }
-    nav a { font-size: 12px; }
-    nav a:not(.button):not(.nav-icon) { display: none; }
+    nav {
+        width: 100%;
+        min-width: 0;
+        justify-content: flex-start;
+        gap: 7px;
+        overflow-x: auto;
+        padding: 2px 0 3px;
+        scrollbar-width: none;
+    }
+    nav::-webkit-scrollbar { display: none; }
+    nav a {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        font-size: 12px;
+    }
+    nav a:not(.nav-icon) { padding: 7px 9px; }
+    nav .button.small { min-height: 32px; padding: 6px 12px; }
+    .nav-icon { padding: 5px 8px !important; }
+    .notification-badge { top: -4px; right: -4px; }
     .hero { padding: 70px 0 74px; }
     .hero h1 { font-size: clamp(3rem, 15vw, 5rem); }
     .lead { font-size: 16px; }

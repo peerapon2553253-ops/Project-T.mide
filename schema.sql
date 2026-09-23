@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `17_users` (
     suspended_until DATETIME NULL,
     suspended_permanent TINYINT(1) NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `17_tasks` (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `17_tasks` (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_17_tasks_user FOREIGN KEY (created_by) REFERENCES `17_users`(id) ON DELETE CASCADE,
     INDEX idx_17_tasks_due_date (due_date)
-);
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `17_comments` (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `17_comments` (
     CONSTRAINT fk_17_comments_parent FOREIGN KEY (parent_id) REFERENCES `17_comments`(id) ON DELETE CASCADE,
     INDEX idx_17_comments_task (task_id),
     INDEX idx_17_comments_parent (parent_id)
-);
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `17_reactions` (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `17_reactions` (
     CONSTRAINT fk_17_reactions_user FOREIGN KEY (user_id) REFERENCES `17_users`(id) ON DELETE CASCADE,
     UNIQUE KEY uq_17_reactions_user_comment (comment_id, user_id),
     INDEX idx_17_reactions_comment (comment_id)
-);
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `17_notifications` (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -61,8 +61,4 @@ CREATE TABLE IF NOT EXISTS `17_notifications` (
     CONSTRAINT fk_17_notifications_actor FOREIGN KEY (actor_id) REFERENCES `17_users`(id) ON DELETE SET NULL,
     CONSTRAINT fk_17_notifications_comment FOREIGN KEY (comment_id) REFERENCES `17_comments`(id) ON DELETE CASCADE,
     INDEX idx_17_notifications_user_read (user_id, is_read, created_at)
-);
-
-ALTER TABLE `17_users`
-    ADD COLUMN IF NOT EXISTS suspended_until DATETIME NULL,
-    ADD COLUMN IF NOT EXISTS suspended_permanent TINYINT(1) NOT NULL DEFAULT 0;
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
